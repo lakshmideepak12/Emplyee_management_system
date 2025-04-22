@@ -8,10 +8,10 @@ class Config:
     SECRET_KEY = os.getenv('SECRET_KEY', 'your-secret-key-here') 
     
     # Database configuration
-    DB_HOST = os.getenv('DB_HOST', 'localhost')
+    DB_HOST = os.getenv('DB_HOST', 'trolley.proxy.rlwy.net')
     DB_USER = os.getenv('DB_USER', 'root')
-    DB_PASSWORD = os.getenv('DB_PASSWORD', '')
-    DB_NAME = os.getenv('DB_NAME', 'vaidpr_ems')
+    DB_PASSWORD = os.getenv('DB_PASSWORD', 'RniQRMvDpLSBfcCzyBHDNHiTlqJNelVd')
+    DB_NAME = os.getenv('DB_NAME', 'railway')
     
     # Session configuration
     PERMANENT_SESSION_LIFETIME = 1800  # 30 minutes
