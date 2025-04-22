@@ -44,10 +44,10 @@ def get_db_connection():
     try:
         # Connect to MySQL database on Railway
         return mysql.connector.connect(
-            host='trolley.proxy.rlwy.net',
-            port=19855,
+            host='nozomi.proxy.rlwy.net',
+            port=18040,
             user='root',
-            password='hucNoZjKVOsVWROObvpJrkduvyoYLIxx',
+            password='RniQRMvDpLSBfcCzyBHDNHiTlqJNelVd',
             database='railway'
             # host='Localhost',
             # port='3306',
