@@ -602,6 +602,9 @@ def employee_log():
 def add_employee():
     if request.method == 'POST':
         try:
+            # Log incoming form data
+            print("Form data received:", request.form)
+
             email = request.form['email']
             name = request.form['name']
             domain = request.form['domain']
@@ -611,32 +614,39 @@ def add_employee():
             adhaar = request.form['adhaar']
             gender = request.form['gender']
             dob = request.form['dob']
-            
+
+            # Optional: Validate required fields manually if needed
+            if not all([email, name, domain, role, password, mobile, adhaar, gender, dob]):
+                flash('Please fill in all fields', 'warning')
+                return redirect(url_for('add_employee'))
+
             # Hash the password
             hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
-            
+
             conn = get_db_connection()
             if conn:
                 cursor = conn.cursor()
                 cursor.execute("""
                     INSERT INTO ems 
-                    (Email, Name, Domain, Role, Pass, Mobile, Adhaar, Permission,gender,dob) 
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s,%s,%s)
+                    (Email, Name, Domain, Role, Pass, Mobile, Adhaar, Permission, gender, dob) 
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 """, (
                     email, name, domain, role, hashed.decode('utf-8'),
-                    mobile, adhaar, 'basic',gender,dob
+                    mobile, adhaar, 'basic', gender, dob
                 ))
                 conn.commit()
                 cursor.close()
                 conn.close()
-                
+
                 flash('Employee added successfully!', 'success')
                 return redirect(url_for('employee_log'))
-                
+
         except Exception as e:
-            print(f"Error adding employee: {e}")
+            import traceback
+            print("Error adding employee:", e)
+            traceback.print_exc()
             flash('Error adding employee', 'error')
-            
+
     return render_template('add_employee.html')
 
 @app.route('/logout')
