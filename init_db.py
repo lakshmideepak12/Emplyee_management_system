@@ -6,10 +6,10 @@ def init_db():
     try:
         # Connect to MySQL database
         conn = mysql.connector.connect(
-            host='trolley.proxy.rlwy.net',
-            port=19855,
+             host='nozomi.proxy.rlwy.net',
+            port=18040,
             user='root',
-            password='hucNoZjKVOsVWROObvpJrkduvyoYLIxx',
+            password='RniQRMvDpLSBfcCzyBHDNHiTlqJNelVd',
             database='railway'
         )
         
@@ -17,22 +17,24 @@ def init_db():
         
         # Create ems table
         cursor.execute('''
-            CREATE TABLE IF NOT EXISTS ems (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                Email VARCHAR(255) UNIQUE NOT NULL,
-                Name VARCHAR(255) NOT NULL,
-                Domain VARCHAR(100),
-                Role VARCHAR(50) NOT NULL,
-                Pass VARCHAR(255) NOT NULL,
-                Mobile VARCHAR(20),
-                Adhaar VARCHAR(20),
-                Attendance INTEGER DEFAULT 0,
-                Leaves INTEGER DEFAULT 0,
-                Permission VARCHAR(50) DEFAULT 'basic',
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        ''')
-        
+    CREATE TABLE IF NOT EXISTS ems (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        Email VARCHAR(255) UNIQUE NOT NULL,
+        Name VARCHAR(255) NOT NULL,
+        Domain VARCHAR(100),
+        Role VARCHAR(50) NOT NULL,
+        Pass VARCHAR(255) NOT NULL,
+        Mobile VARCHAR(20),
+        Adhaar VARCHAR(20),
+        Attendance INTEGER DEFAULT 0,
+        Leaves INTEGER DEFAULT 0,
+        Permission VARCHAR(50) DEFAULT 'basic',
+        Gender VARCHAR(10),
+        Dob DATE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+''')
+
         # Create leave_applications table
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS leave_applications (
