@@ -1,87 +1,96 @@
 import mysql.connector
-from config.config import Config
+import bcrypt
+from datetime import datetime
 
 def init_db():
     try:
-        # Connect to MySQL server
+        # Connect to MySQL database
         conn = mysql.connector.connect(
-            host=Config.DB_HOST,
-            user=Config.DB_USER,
-            password=Config.DB_PASSWORD
+             host='nozomi.proxy.rlwy.net',
+            port=18040,
+            user='root',
+            password='RniQRMvDpLSBfcCzyBHDNHiTlqJNelVd',
+            database='railway'
         )
+        
         cursor = conn.cursor()
-
-        # Create database if it doesn't exist
-        cursor.execute(f"CREATE DATABASE IF NOT EXISTS {Config.DB_NAME}")
-        cursor.execute(f"USE {Config.DB_NAME}")
-
+        
         # Create ems table
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS ems (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                Email VARCHAR(255) UNIQUE NOT NULL,
-                Name VARCHAR(255) NOT NULL,
-                Domain VARCHAR(255) NOT NULL,
-                Role VARCHAR(255) NOT NULL,
-                Pass VARCHAR(255) NOT NULL,
-                Mobile VARCHAR(15) UNIQUE NOT NULL,
-                Adhaar VARCHAR(200) UNIQUE NOT NULL,
-                dob date NOT NULL,       
-                Attendance INT DEFAULT 0,
-                Leaves INT DEFAULT 0,
-                Permission VARCHAR(225) NOT NULL,
-                CONSTRAINT chk_mobile CHECK (LENGTH(Mobile) >= 10),
-                CONSTRAINT chk_adhaar CHECK (LENGTH(Adhaar) = 12)
-            )
-        """)
-
-        # Create work_log table with additional fields
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS work_log (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                employee_email VARCHAR(255) NOT NULL,
-                subject VARCHAR(255) NOT NULL,
-                body TEXT NOT NULL,
-                assigned_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                deadline DATETIME NOT NULL,
-                status ENUM('Pending', 'In Progress', 'Completed', 'Delayed') DEFAULT 'Pending',
-                FOREIGN KEY (employee_email) REFERENCES ems(Email)
-            )
-        """)
+        cursor.execute('''
+    CREATE TABLE IF NOT EXISTS ems (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        Email VARCHAR(255) UNIQUE NOT NULL,
+        Name VARCHAR(255) NOT NULL,
+        Domain VARCHAR(100),
+        Role VARCHAR(50) NOT NULL,
+        Pass VARCHAR(255) NOT NULL,
+        Mobile VARCHAR(20),
+        Adhaar VARCHAR(20),
+        Attendance INTEGER DEFAULT 0,
+        Leaves INTEGER DEFAULT 0,
+        Permission VARCHAR(50) DEFAULT 'basic',
+        Gender VARCHAR(10),
+        Dob DATE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+''')
 
         # Create leave_applications table
-        cursor.execute("""
+        cursor.execute('''
             CREATE TABLE IF NOT EXISTS leave_applications (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 employee_email VARCHAR(255) NOT NULL,
                 subject VARCHAR(255) NOT NULL,
                 body TEXT NOT NULL,
-                status ENUM('Pending', 'Accepted', 'Declined') DEFAULT 'Pending',
+                status VARCHAR(50) DEFAULT 'Pending',
                 request_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (employee_email) REFERENCES ems(Email)
             )
-        """)
-
+        ''')
+        
+        # Create work_log table
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS work_log (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                employee_email VARCHAR(255) NOT NULL,
+                subject VARCHAR(255) NOT NULL,
+                body TEXT NOT NULL,
+                status VARCHAR(50) DEFAULT 'Pending',
+                assigned_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                deadline DATE,
+                FOREIGN KEY (employee_email) REFERENCES ems(Email)
+            )
+        ''')
+        
         # Insert default admin user if not exists
-        cursor.execute("""
+        admin_password = 'admin123'
+        hashed_password = bcrypt.hashpw(admin_password.encode('utf-8'), bcrypt.gensalt())
+        
+        cursor.execute('''
             INSERT IGNORE INTO ems 
-            (Email, Name, Domain, Role, Pass, Mobile, Adhaar, Permission) 
-            VALUES 
-            ('admin@vaidpr.com', 'Admin', 'Administration', 'Admin', 
-             '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdsBHrpxFPH.G2.', 
-             '9999999999', '123456789012', 'all')
-        """)
-
+            (Email, Name, Domain, Role, Pass, Permission)
+            VALUES (%s, %s, %s, %s, %s, %s)
+        ''', (
+            'admin@example.com',
+            'Admin User',
+            'Administration',
+            'Admin',
+            hashed_password.decode('utf-8'),
+            'admin'
+        ))
+        
         conn.commit()
         print("Database initialized successfully!")
-
-    except mysql.connector.Error as err:
-        print(f"Error: {err}")
-
+        
+    except Exception as e:
+        print(f"Error initializing database: {e}")
+        if 'conn' in locals() and conn:
+            conn.rollback()
     finally:
-        if 'conn' in locals() and conn.is_connected():
+        if 'cursor' in locals() and cursor:
             cursor.close()
+        if 'conn' in locals() and conn:
             conn.close()
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     init_db() 
